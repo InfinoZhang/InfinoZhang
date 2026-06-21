@@ -22,6 +22,7 @@ import contactProductDrone from './assets/contact-product-drone.png'
 import contactProductEarbuds from './assets/contact-product-earbuds.png'
 import contactProductProjector from './assets/contact-product-projector.png'
 import contactProductVacuum from './assets/contact-product-vacuum.png'
+import heroShowreelVideo from './assets/hero-showreel.mp4'
 import heroProductWall from './assets/hero-product-wall.jpg'
 import infinoLogo from './assets/infino-logo.png'
 import serviceAds from './assets/service-ads.jpg'
@@ -193,7 +194,18 @@ function toggleCaseVideo(event) {
     </header>
 
     <main id="top">
-      <section class="hero" :style="{ backgroundImage: `linear-gradient(90deg, rgba(8, 10, 10, .86), rgba(8, 10, 10, .5)), url(${heroProductWall})` }">
+      <section class="hero">
+        <video
+          class="hero-video"
+          :src="heroShowreelVideo"
+          :poster="heroProductWall"
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="auto"
+          aria-hidden="true"
+        ></video>
         <div class="hero-content">
           <h1 class="hero-title" data-text="无界映像 Infino">无界映像 Infino</h1>
           <p class="hero-slogan">让每一个产品，都拥有无限表达</p>
