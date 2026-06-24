@@ -148,12 +148,57 @@ const form = ref({
   timeline: '',
   budget: '500以下',
   note: '',
+  botField: '',
 })
 
 const submitted = ref(false)
+const submitting = ref(false)
+const submitError = ref('')
 
-function submitBrief() {
-  submitted.value = true
+async function submitBrief() {
+  submitted.value = false
+  submitError.value = ''
+
+  if (form.value.botField) {
+    return
+  }
+
+  submitting.value = true
+
+  const payload = new URLSearchParams({
+    'form-name': 'brief',
+    subject: 'Infino 官网新需求',
+    company: form.value.company,
+    name: form.value.name,
+    email: form.value.email,
+    phone: form.value.phone,
+    category: form.value.category,
+    sku: form.value.sku,
+    timeline: form.value.timeline,
+    assetType: form.value.assetType,
+    budget: form.value.budget,
+    platform: form.value.platform,
+    note: form.value.note,
+    'bot-field': form.value.botField,
+  })
+
+  try {
+    const response = await fetch('/__forms.html', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: payload.toString(),
+    })
+
+    if (!response.ok) {
+      throw new Error('Form submission failed')
+    }
+
+    submitted.value = true
+  } catch {
+    submitError.value = '提交失败，请稍后重试，或直接通过邮箱联系我们。'
+  } finally {
+    submitting.value = false
+  }
 }
 
 function playCaseVideo(event) {
@@ -340,41 +385,56 @@ function toggleCaseVideo(event) {
           <div class="brief-visual" aria-label="联系我们产品场景图"></div>
         </div>
 
-        <form class="brief-form" @submit.prevent="submitBrief">
+        <form
+          class="brief-form"
+          name="brief"
+          method="POST"
+          data-netlify="true"
+          netlify-honeypot="bot-field"
+          @submit.prevent="submitBrief"
+        >
+          <input type="hidden" name="form-name" value="brief" />
+          <input type="hidden" name="subject" value="Infino 官网新需求" />
+          <p hidden>
+            <label>
+              请不要填写此字段
+              <input v-model="form.botField" name="bot-field" />
+            </label>
+          </p>
           <label>
             企业名称
-            <input v-model="form.company" required placeholder="例如：Infino Beauty" />
+            <input v-model="form.company" name="company" required placeholder="例如：Infino Beauty" />
           </label>
           <label>
             姓名
-            <input v-model="form.name" required placeholder="例如：张先生" />
+            <input v-model="form.name" name="name" required placeholder="例如：张先生" />
           </label>
           <label>
             邮箱
-            <input v-model="form.email" type="email" placeholder="例如：name@example.com" />
+            <input v-model="form.email" name="email" type="email" placeholder="例如：name@example.com" />
           </label>
           <label>
             电话
-            <input v-model="form.phone" type="tel" placeholder="例如：138 0000 0000" />
+            <input v-model="form.phone" name="phone" type="tel" placeholder="例如：138 0000 0000" />
           </label>
           <label>
             产品品类
-            <input v-model="form.category" placeholder="护肤、美妆、食品、家居..." />
+            <input v-model="form.category" name="category" placeholder="护肤、美妆、食品、家居..." />
           </label>
           <div class="form-row">
             <label>
               SKU 数量
-              <input v-model="form.sku" placeholder="例如：1-5 个" />
+              <input v-model="form.sku" name="sku" placeholder="例如：1-5 个" />
             </label>
             <label>
               交付时间
-              <input v-model="form.timeline" type="date" />
+              <input v-model="form.timeline" name="timeline" type="date" />
             </label>
           </div>
           <div class="form-row">
             <label>
               需要内容
-              <select v-model="form.assetType">
+              <select v-model="form.assetType" name="assetType">
                 <option>图片和视频</option>
                 <option>仅图片</option>
                 <option>仅视频</option>
@@ -382,7 +442,7 @@ function toggleCaseVideo(event) {
             </label>
             <label>
               预算范围
-              <select v-model="form.budget">
+              <select v-model="form.budget" name="budget">
                 <option>500以下</option>
                 <option>500-1000</option>
                 <option>1000以上</option>
@@ -391,18 +451,21 @@ function toggleCaseVideo(event) {
           </div>
           <label>
             目标平台
-            <input v-model="form.platform" placeholder="Shopify / Amazon / TikTok / 小红书..." />
+            <input v-model="form.platform" name="platform" placeholder="Shopify / Amazon / TikTok / 小红书..." />
           </label>
           <label>
             产品图与品牌资料说明
-            <textarea v-model="form.note" rows="4" placeholder="可写产品链接、资料情况、参考风格或投放目标。" />
+            <textarea v-model="form.note" name="note" rows="4" placeholder="可写产品链接、资料情况、参考风格或投放目标。" />
           </label>
-          <button class="button primary form-button" type="submit">
+          <button class="button primary form-button" type="submit" :disabled="submitting">
             <Upload :size="18" />
-            联系我们
+            {{ submitting ? '提交中...' : '联系我们' }}
           </button>
           <p v-if="submitted" class="form-success">
-            已记录这次需求。下一步接入 Django 后台后，可把表单内容保存为线索。
+            已收到这次需求，我们会尽快查看并联系你。
+          </p>
+          <p v-if="submitError" class="form-error">
+            {{ submitError }}
           </p>
         </form>
       </section>

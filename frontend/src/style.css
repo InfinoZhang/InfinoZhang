@@ -988,6 +988,14 @@ textarea:focus {
   line-height: 1.55;
 }
 
+.form-error {
+  padding: 12px;
+  border-radius: 8px;
+  background: #f8e8e2;
+  color: #94432f;
+  line-height: 1.55;
+}
+
 .footer {
   display: flex;
   min-height: 76px;
